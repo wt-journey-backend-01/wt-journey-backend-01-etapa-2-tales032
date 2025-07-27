@@ -1,4 +1,5 @@
 const agentesRepository = require("../repositories/agentesRepository");
+const validations = require("../utils/errorHandler")
 
 function checkExist(id, res){
     const agente = agentesRepository.getAgentByID(id);
@@ -20,22 +21,23 @@ function getAgentByIDController(req, res) {
         const { id } = req.params;
         const agente = checkExist(id, res);
          if (!agente) return; 
-         res.status(200).json(agente);
+        res.status(200).json(agente);
 }
 
 function createAgentController(req, res) {
+        const data = req.body;
+        const newAgentController = agentesRepository.createAgent(data);
+        validations.validationsAgent(data, res);
 
-    const data = req.body;
-    const newAgentController = agentesRepository.createAgent(data);
-    res.status(201).json(newAgentController);
+        res.status(201).json(newAgentController);
 }
 
 function updateAgentController(req,res){
         const { id } = req.params;
         const data = req.body;
         checkExist(id);
-        
-      // add verificacoes
+        validations.validationsAgent(data, res);
+     
 
         const updatedAgentController = agentesRepository.patchAgente(id, data);
         res.status(200).json(updatedAgentController);
@@ -44,9 +46,8 @@ function updateAgentController(req,res){
 function patchAgentController(req,res){
         const { id } = req.params;
         const data = req.body;
-
         checkExist(id);
-
+        validations.validationsAgent(data, res);
 
     const patchedAgentController = agentesRepository.patchAgente(id, data);
     res.status(200).json(patchedAgentController);
@@ -58,6 +59,7 @@ function deleteAgentController(req,res){
         const { id } = req.params;
         checkExist(id);
 
+        
         const deletedAgent = agentesRepository.deleteAgent(id);
         res.status(200).json(deletedAgent);
 }
