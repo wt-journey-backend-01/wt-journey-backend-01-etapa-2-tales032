@@ -1,12 +1,11 @@
 const agentesRepository = require("../repositories/agentesRepository");
 const validations = require("../utils/errorHandler")
 
-function checkExist(id, res){
+function checkExist(id, res) {
     const agente = agentesRepository.getAgentByID(id);
     if (!agente) {
-        return res.status(404).json({
-            message: "Agente não cadastrado no banco de dados!"
-        });
+        res.status(404).json({ message: "Agente não cadastrado no banco de dados!" });
+        return null;
     }
     return agente; 
 }
@@ -26,17 +25,24 @@ function getAgentByIDController(req, res) {
 
 function createAgentController(req, res) {
         const data = req.body;
-        const newAgentController = agentesRepository.createAgent(data);
         validations.validationsAgent(data, res);
-
+         const isValid = validations.validationsAgent(data, res);
+         if (!isValid) {
+        return; 
+        }
+        const newAgentController = agentesRepository.createAgent(data);
         res.status(201).json(newAgentController);
 }
 
 function updateAgentController(req,res){
         const { id } = req.params;
         const data = req.body;
-        checkExist(id);
-        validations.validationsAgent(data, res);
+        const caso = checkExist(id, res);
+        if (!caso) return; 
+        const isValid = validations.validationsAgent(data, res);
+        if (!isValid) {
+        return; 
+        }
      
 
         const updatedAgentController = agentesRepository.patchAgente(id, data);
@@ -46,8 +52,12 @@ function updateAgentController(req,res){
 function patchAgentController(req,res){
         const { id } = req.params;
         const data = req.body;
-        checkExist(id);
-        validations.validationsAgent(data, res);
+        const caso = checkExist(id, res);
+        if (!caso) return; 
+        const isValid = validations.validationsAgent(data, res);
+        if (!isValid) {
+        return; 
+        }
 
     const patchedAgentController = agentesRepository.patchAgente(id, data);
     res.status(200).json(patchedAgentController);
@@ -57,11 +67,12 @@ function patchAgentController(req,res){
 
 function deleteAgentController(req,res){
         const { id } = req.params;
-        checkExist(id);
+        const caso = checkExist(id, res);
+        if (!caso) return; 
 
         
-        const deletedAgent = agentesRepository.deleteAgent(id);
-        res.status(200).json(deletedAgent);
+        agentesRepository.deleteAgent(id);
+        res.status(294).json(id);
 }
 
 module.exports = {
