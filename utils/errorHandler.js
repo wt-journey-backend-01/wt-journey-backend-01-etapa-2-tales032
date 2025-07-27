@@ -22,9 +22,10 @@ function validationsCase(data, res){
          if (!data.status || !['aberto', 'solucionado'].includes(data.status)) {
         return res.status(400).json({ message: "Status inválido. Deve ser 'aberto' ou 'solucionado'." });
          }
-        if (!data.agente_id || !agentesRepository.getAgentByID(data.agente_id)) {
-        return res.status(404).json({ message: "Agente responsável não encontrado." });
-         }
+         if (!agentesRepository.getAgentByID(data.agente_id)) {
+        res.status(404).json({ message: "Agente não encontrado para o agente_id informado." });
+        return false;
+    }
 
      return true;    
 }

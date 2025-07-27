@@ -25,7 +25,7 @@ function getAgentByIDController(req, res) {
 
 function createAgentController(req, res) {
         const data = req.body;
-        validations.validationsAgent(data, res);
+       
          const isValid = validations.validationsAgent(data, res);
          if (!isValid) {
         return; 
@@ -37,23 +37,24 @@ function createAgentController(req, res) {
 function updateAgentController(req,res){
         const { id } = req.params;
         const data = req.body;
-        const caso = checkExist(id, res);
-        if (!caso) return; 
+        const agente = checkExist(id, res);
+        if (!agente) return; 
+
         const isValid = validations.validationsAgent(data, res);
         if (!isValid) {
         return; 
         }
      
 
-        const updatedAgentController = agentesRepository.patchAgente(id, data);
+        const updatedAgentController = agentesRepository.updateAgente(id, data);
         res.status(200).json(updatedAgentController);
 }
 
 function patchAgentController(req,res){
         const { id } = req.params;
         const data = req.body;
-        const caso = checkExist(id, res);
-        if (!caso) return; 
+        const agente = checkExist(id, res);
+        if (!agente) return; 
         const isValid = validations.validationsAgent(data, res);
         if (!isValid) {
         return; 
@@ -67,12 +68,12 @@ function patchAgentController(req,res){
 
 function deleteAgentController(req,res){
         const { id } = req.params;
-        const caso = checkExist(id, res);
-        if (!caso) return; 
+        const agente = checkExist(id, res);
+        if (!agente) return; 
 
         
         agentesRepository.deleteAgent(id);
-        res.status(294).json(id);
+        res.status(204).json(id);
 }
 
 module.exports = {
