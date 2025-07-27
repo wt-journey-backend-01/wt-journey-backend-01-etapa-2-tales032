@@ -8,7 +8,7 @@ function validationsCase(data, res){
          if (!data.titulo || typeof data.titulo !== 'string'  || data.titulo.trim() === '') {
         return res.status(400).json({ message: "Título do caso é obrigatório." });
          }
-         if (!data.descricao || typeof data.titulo !== 'string'  ||  data.descricao.trim() === '') {
+         if (!data.descricao || typeof data.descricao !== 'string'  ||  data.descricao.trim() === '') {
         return res.status(400).json({ message: "Descrição do caso é obrigatória." });
          }
          if (!data.status || !['aberto', 'solucionado'].includes(data.status)) {
