@@ -8,7 +8,7 @@ app.use(express.json());
 
 
 
-app.use('/agent', agentesRoutes);
+app.use('/agentes', agentesRoutes);
 app.use('/casos', casosRoutes);
 
 app.listen(PORT, () => {
