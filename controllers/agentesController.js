@@ -1,5 +1,29 @@
 const agentesRepository = require("../repositories/agentesRepository");
-const validations = require("../utils/errorHandler")
+const { parse, isValid } = require('date-fns');
+
+
+function checkDate(dateString) {
+    const date = parse(dateString, 'yyyy/MM/dd', new Date());
+    return isValid(date);
+}
+
+
+function validationsAgent(data, res){
+        if (data.id) {
+        return res.status(400).json({ message: "Não é permitido alterar o ID de um agente." });
+        }
+        if (!data.dataDeIncorporacao || !checkDate(data.dataDeIncorporacao)) {
+        return res.status(400).json({ message: "Data de incorporação é obrigatória e deve estar no formato YYYY/MM/DD." });
+         }
+         if (!data.nome || typeof data.nome !== 'string'  || data.nome.trim() === '') {
+        return res.status(400).json({ message: "Nome de um agente é obrigatório." });
+         }
+         if (!data.cargo || typeof data.cargo !== 'string'  ||  data.cargo.trim() === '') {
+        return res.status(400).json({ message: "Cargo do agente é obrigatório." });
+         }
+    
+     return true;    
+}
 
 function checkExist(id, res) {
     const agente = agentesRepository.getAgentByID(id);
@@ -13,7 +37,7 @@ function checkExist(id, res) {
 function getAllController(req, res) {
 
         const agentes = agentesRepository.getAll()
-        res.json(agentes)
+        res.status(200).json(agentes);
 }
 
 function getAgentByIDController(req, res) {
@@ -26,7 +50,7 @@ function getAgentByIDController(req, res) {
 function createAgentController(req, res) {
         const data = req.body;
        
-         const isValid = validations.validationsAgent(data, res);
+         const isValid = validationsAgent(data, res);
          if (!isValid) {
         return; 
         }
@@ -40,7 +64,7 @@ function updateAgentController(req,res){
         const agente = checkExist(id, res);
         if (!agente) return; 
 
-        const isValid = validations.validationsAgent(data, res);
+        const isValid = validationsAgent(data, res);
         if (!isValid) {
         return; 
         }
@@ -55,7 +79,7 @@ function patchAgentController(req,res){
         const data = req.body;
         const agente = checkExist(id, res);
         if (!agente) return; 
-        const isValid = validations.validationsAgent(data, res);
+        const isValid = validationsAgent(data, res);
         if (!isValid) {
         return; 
         }
@@ -73,7 +97,7 @@ function deleteAgentController(req,res){
 
         
         agentesRepository.deleteAgent(id);
-        res.status(204).json(id);
+        res.status(204).send();
 }
 
 module.exports = {
