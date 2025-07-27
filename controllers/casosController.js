@@ -1,25 +1,48 @@
 const casosRepository = require("../repositories/casosRepository");
 const agentesRepository = require("../repositories/agentesRepository");
 
-function validationsCase(data, res){
-        if (data.id) {
-        return res.status(400).json({ message: "Não é permitido alterar o ID de um caso." });
-        }
-         if (!data.titulo || typeof data.titulo !== 'string'  || data.titulo.trim() === '') {
-        return res.status(400).json({ message: "Título do caso é obrigatório." });
-         }
-         if (!data.descricao || typeof data.descricao !== 'string'  ||  data.descricao.trim() === '') {
-        return res.status(400).json({ message: "Descrição do caso é obrigatória." });
-         }
-         if (!data.status || !['aberto', 'solucionado'].includes(data.status)) {
-        return res.status(400).json({ message: "Status inválido. Deve ser 'aberto' ou 'solucionado'." });
-         }
-         if (!data.agente_id || !agentesRepository.getAgentByID(data.agente_id)) {
-        res.status(404).json({ message: "Agente não encontrado para o agente_id informado." });
+function validateNewCase(data, res) {
+    if (!data.titulo || typeof data.titulo !== 'string' || data.titulo.trim() === '') {
+        res.status(400).json({ message: "O campo 'titulo' é obrigatório." });
         return false;
     }
+    if (!data.descricao || typeof data.descricao !== 'string' || data.descricao.trim() === '') {
+        res.status(400).json({ message: "O campo 'descricao' é obrigatório." });
+        return false;
+    }
+    if (!data.status || !['aberto', 'solucionado'].includes(data.status)) {
+        res.status(400).json({ message: "Status inválido. Deve ser 'aberto' ou 'solucionado'." });
+        return false;
+    }
+    if (!data.agente_id || !agentesRepository.getAgentByID(data.agente_id)) {
+        res.status(404).json({ message: "Agente responsável não encontrado." });
+        return false;
+    }
+    return true;
+}
 
-     return true;    
+function validateUpdateCase(data, res) {
+    if (data.id) {
+        res.status(400).json({ message: "Não é permitido alterar o ID de um caso." });
+        return false;
+    }
+    if (data.titulo && (typeof data.titulo !== 'string' || data.titulo.trim() === '')) {
+        res.status(400).json({ message: "O campo 'titulo' deve ser uma string não vazia." });
+        return false;
+    }
+    if (data.descricao && (typeof data.descricao !== 'string' || data.descricao.trim() === '')) {
+        res.status(400).json({ message: "O campo 'descricao' deve ser uma string não vazia." });
+        return false;
+    }
+    if (data.status && !['aberto', 'solucionado'].includes(data.status)) {
+        res.status(400).json({ message: "Status inválido. Deve ser 'aberto' ou 'solucionado'." });
+        return false;
+    }
+    if (data.agente_id && !agentesRepository.getAgentByID(data.agente_id)) {
+        res.status(404).json({ message: "Novo agente responsável não encontrado." });
+        return false;
+    }
+    return true;
 }
 
 function checkExist(id, res) {
@@ -46,11 +69,9 @@ function getCaseByIDController(req, res) {
 
 function createCaseController(req,res){
         const data = req.body;
-        const isValid = validationsCase(data, res);
-        if (!isValid) {
-        return; 
+        if (!validateNewCase(data, res)) {
+        return;
         }
-
         const newCase = casosRepository.createCase(data);
         res.status(201).json(newCase);
 }
@@ -58,39 +79,27 @@ function createCaseController(req,res){
 function updateCaseController(req,res){
         const { id } = req.params;
         const data = req.body;
-        const caso = checkExist(id, res);
-        if (!caso) return; 
-        const isValid =  validationsCase(data, res);
-        if (!isValid) {
-        return; 
-        }
-
-        const updatedCaseController = casosRepository.updateCase(id, data);
-        res.status(200).json(updatedCaseController);
+         if (!checkExist(id, res)) return;
+        if (!validateUpdateCase(data, res)) return;
+        const updatedCase = casosRepository.updateCase(id, data);
+        res.status(200).json(updatedCase);
 }
 
 function patchCaseController(req,res){
         const { id } = req.params;
-        const data = req.body;
-        const caso = checkExist(id, res);
-        if (!caso) return; 
-        const isValid = validationsCase(data, res);
-        if (!isValid) {
-        return; 
-        }
-        
- 
-        const patchedCaseController = casosRepository.patchCase(id, data);
-        res.status(200).json(patchedCaseController);
+         const data = req.body;
+         if (!checkExist(id, res)) return;
+        if (!validateUpdateCase(data, res)) return;
+        const patchedCase = casosRepository.patchCase(id, data);
+         res.status(200).json(patchedCase);
 }
 
 function deleteCaseController(req,res){
         const { id } = req.params;
-        const caso = checkExist(id, res);
-        if (!caso) return; 
-
+        if (!checkExist(id, res)) return;
         casosRepository.deleteCase(id);
         res.status(204).send();
+
         
 }
 

@@ -1,29 +1,66 @@
 const agentesRepository = require("../repositories/agentesRepository");
-const { parse, isValid } = require('date-fns');
 
 
-function checkDate(dateString) {
-    const date = parse(dateString, 'yyyy/MM/dd', new Date());
-    return isValid(date);
+function isValidDate(dateString) {
+    const regex = /^\d{4}\/\d{2}\/\d{2}$/;
+    if (!regex.test(dateString)) return false;
+
+    const parts = dateString.split("/");
+    const year = parseInt(parts[0], 10);
+    const month = parseInt(parts[1], 10);
+    const day = parseInt(parts[2], 10);
+    const date = new Date(year, month - 1, day);
+
+    const today = new Date();
+    today.setHours(0, 0, 0, 0); 
+
+
+    const isValid = date.getFullYear() === year &&
+                    date.getMonth() === month - 1 &&
+                    date.getDate() === day &&
+                    date <= today;
+
+    return isValid;
 }
 
-
-function validationsAgent(data, res){
-        if (data.id) {
-        return res.status(400).json({ message: "Não é permitido alterar o ID de um agente." });
-        }
-        if (!data.dataDeIncorporacao || !checkDate(data.dataDeIncorporacao)) {
-        return res.status(400).json({ message: "Data de incorporação é obrigatória e deve estar no formato YYYY/MM/DD." });
-         }
-         if (!data.nome || typeof data.nome !== 'string'  || data.nome.trim() === '') {
-        return res.status(400).json({ message: "Nome de um agente é obrigatório." });
-         }
-         if (!data.cargo || typeof data.cargo !== 'string'  ||  data.cargo.trim() === '') {
-        return res.status(400).json({ message: "Cargo do agente é obrigatório." });
-         }
-    
-     return true;    
+function validateNewAgent(data, res) {
+    if (!data.nome || typeof data.nome !== 'string' || data.nome.trim() === '') {
+        res.status(400).json({ message: "O campo 'nome' é obrigatório." });
+        return false;
+    }
+    if (!data.dataDeIncorporacao || !isValidDate(data.dataDeIncorporacao)) {
+        res.status(400).json({ message: "O campo 'dataDeIncorporacao' é obrigatório, deve estar no formato YYYY/MM/DD e não pode ser no futuro." });
+        return false;
+    }
+    if (!data.cargo || typeof data.cargo !== 'string' || data.cargo.trim() === '') {
+        res.status(400).json({ message: "O campo 'cargo' é obrigatório." });
+        return false;
+    }
+    return true;
 }
+
+function validateUpdateAgent(data, res) {
+    if (data.id) {
+        res.status(400).json({ message: "Não é permitido alterar o ID de um agente." });
+        return false;
+    }
+    // Valida os campos apenas se eles foram enviados na requisição
+    if (data.nome && (typeof data.nome !== 'string' || data.nome.trim() === '')) {
+        res.status(400).json({ message: "O campo 'nome' deve ser uma string não vazia." });
+        return false;
+    }
+    if (data.dataDeIncorporacao && !isValidDate(data.dataDeIncorporacao)) {
+        res.status(400).json({ message: "O campo 'dataDeIncorporacao' deve estar no formato YYYY/MM/DD e não pode ser no futuro." });
+        return false;
+    }
+    if (data.cargo && (typeof data.cargo !== 'string' || data.cargo.trim() === '')) {
+        res.status(400).json({ message: "O campo 'cargo' deve ser uma string não vazia." });
+        return false;
+    }
+    return true;
+}
+  
+
 
 function checkExist(id, res) {
     const agente = agentesRepository.getAgentByID(id);
@@ -48,56 +85,42 @@ function getAgentByIDController(req, res) {
 }
 
 function createAgentController(req, res) {
-        const data = req.body;
-       
-         const isValid = validationsAgent(data, res);
-         if (!isValid) {
-        return; 
+         const data = req.body;
+         if (!validateNewAgent(data, res)) {
+        return;
         }
-        const newAgentController = agentesRepository.createAgent(data);
-        res.status(201).json(newAgentController);
+        const newAgent = agentesRepository.createAgent(data);
+        res.status(201).json(newAgent);
+
 }
 
 function updateAgentController(req,res){
         const { id } = req.params;
         const data = req.body;
-        const agente = checkExist(id, res);
-        if (!agente) return; 
-
-        const isValid = validationsAgent(data, res);
-        if (!isValid) {
-        return; 
-        }
-     
-
-        const updatedAgentController = agentesRepository.updateAgente(id, data);
-        res.status(200).json(updatedAgentController);
+        if (!checkExist(id, res)) return;
+        if (!validateUpdateAgent(data, res)) return;
+        const updatedAgent = agentesRepository.updateAgente(id, data);
+        res.status(200).json(updatedAgent);
 }
 
 function patchAgentController(req,res){
         const { id } = req.params;
         const data = req.body;
-        const agente = checkExist(id, res);
-        if (!agente) return; 
-        const isValid = validationsAgent(data, res);
-        if (!isValid) {
-        return; 
-        }
+        if (!checkExist(id, res)) return;
+        if (!validateUpdateAgent(data, res)) return; // Reutilizei a mesma validação de update
+        const patchedAgent = agentesRepository.patchAgente(id, data);
+        res.status(200).json(patchedAgent);
 
-    const patchedAgentController = agentesRepository.patchAgente(id, data);
-    res.status(200).json(patchedAgentController);
+     
 }
 
 
 
 function deleteAgentController(req,res){
-        const { id } = req.params;
-        const agente = checkExist(id, res);
-        if (!agente) return; 
-
-        
+         const { id } = req.params;
+         if (!checkExist(id, res)) return;
         agentesRepository.deleteAgent(id);
-        res.status(204).send();
+         res.status(204).send();
 }
 
 module.exports = {
