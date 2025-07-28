@@ -56,8 +56,25 @@ function checkExist(id, res) {
 
 
 function getCasosController(req, res) {
-        const casos = casosRepository.getAll()
-        res.status(200).json(casos);
+   
+    let casos = casosRepository.getAll();
+    const { status, agente_id, search } = req.query;
+
+    if (status) {
+        casos = casos.filter(caso => caso.status === status);
+    }
+    if (agente_id) {
+        casos = casos.filter(caso => caso.agente_id === agente_id);
+    }
+    if (search) {
+        const lowerSearch = search.toLowerCase();
+        casos = casos.filter(caso =>
+            caso.titulo.toLowerCase().includes(lowerSearch) ||
+            caso.descricao.toLowerCase().includes(lowerSearch)
+        );
+    }
+
+    res.status(200).json(casos);
 }
 
 function getCaseByIDController(req, res) {

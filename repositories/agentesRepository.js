@@ -2,11 +2,10 @@ const {v4 : uuid} = require("uuid");
 
 const agentes = [
     {
-    "id": "401bccf5-cf9e-489d-8412-446cd169a0f1",
+    "id": "f47ac10b-58cc-4372-a567-0e02b2c3d479",
     "nome": "Rommel Carneiro",
     "dataDeIncorporacao": "1992/10/04",
     "cargo": "delegado"
-
     },
    
 ]
@@ -32,7 +31,7 @@ function createAgent(data) {
 }
 
 
-function updateAgente(id, dadosParaAtualizar){
+function updateAgent(id, dadosParaAtualizar){
     const agenteIndex = agentes.findIndex(agente => agente.id === id);
 
     if(agenteIndex === -1 ){
@@ -51,7 +50,7 @@ function updateAgente(id, dadosParaAtualizar){
     
 }
 
-function patchAgente(id, dadosParaAtualizar){
+function patchAgent(id, dadosParaAtualizar){
     const agenteIndex = agentes.findIndex(agente => agente.id === id);
 
     if(agenteIndex === -1 ){
@@ -85,7 +84,7 @@ module.exports = {
     getAll,
     getAgentByID,
     createAgent,
-    updateAgente, 
+    updateAgent, 
     deleteAgent,
-    patchAgente
+    patchAgent
 }

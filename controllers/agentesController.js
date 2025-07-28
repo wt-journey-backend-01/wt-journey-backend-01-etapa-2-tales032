@@ -73,8 +73,14 @@ function checkExist(id, res) {
 
 function getAllController(req, res) {
 
-        const agentes = agentesRepository.getAll()
-        res.status(200).json(agentes);
+    let agentes = agentesRepository.getAll();
+    const { sortBy } = req.query;
+    if (sortBy === 'dataDeIncorporacao') {
+        agentes.sort((a, b) => new Date(a.dataDeIncorporacao) - new Date(b.dataDeIncorporacao));
+    }
+
+    // 4. Envia a lista (ordenada ou não) como resposta
+    res.status(200).json(agentes);
 }
 
 function getAgentByIDController(req, res) {
