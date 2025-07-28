@@ -10,78 +10,84 @@ const agentesController = require('../controllers/agentesController');
  */
 
 /**
- * @swagger
- * components:
- *   schemas:
- *     Agente:
- *       type: object
- *       required:
- *         - nome
- *         - dataDeIncorporacao
- *         - cargo
- *       properties:
- *         id:
- *           type: string
- *           format: uuid
- *           description: O ID gerado automaticamente para o agente.
- *         nome:
- *           type: string
- *           description: O nome completo do agente.
- *         dataDeIncorporacao:
- *           type: string
- *           format: date
- *           description: A data de incorporação do agente (formato YYYY-MM-DD).
- *         cargo:
- *           type: string
- *           description: O cargo do agente.
- *       example:
- *         id: "401bccf5-cf9e-489d-8412-446cd169a0f1"
- *         nome: "Clara Monteiro"
- *         dataDeIncorporacao: "2010-05-15"
- *         cargo: "Delegada Titular"
+* @swagger
+* components:
+*   schemas:
+*     Agente:
+*       type: object
+*       required:
+*         - nome
+*         - dataDeIncorporacao
+*         - cargo
+*       properties:
+*         id:
+*           type: string
+*           format: uuid
+*           description: O ID gerado automaticamente para o agente.
+*         nome:
+*           type: string
+*           description: O nome completo do agente.
+*         dataDeIncorporacao:
+*           type: string
+*           format: date
+*           description: A data de incorporação do agente (formato YYYY-MM-DD).
+*         cargo:
+*           type: string
+*           description: O cargo do agente.
+*       example:
+*         id: "401bccf5-cf9e-489d-8412-446cd169a0f1"
+*         nome: "Clara Monteiro"
+*         dataDeIncorporacao: "2010-05-15" # MUDOU: formato da data
+*         cargo: "Delegada Titular"
 
- *     NewAgente:
- *       type: object
- *       required:
- *         - nome
- *         - dataDeIncorporacao
- *         - cargo
- *       properties:
- *         nome:
- *           type: string
- *         dataDeIncorporacao:
- *           type: string
- *           format: date
- *         cargo:
- *           type: string
- *       example:
- *         nome: "Clara Monteiro"
- *         dataDeIncorporacao: "2010-05-15"
- *         cargo: "Delegada Titular"
- */
+*     NewAgente:
+*       type: object
+*       required:
+*         - nome
+*         - dataDeIncorporacao
+*         - cargo
+*       properties:
+*         nome:
+*           type: string
+*         dataDeIncorporacao:
+*           type: string
+*           format: date
+*         cargo:
+*           type: string
+*       example:
+*         nome: "Clara Monteiro"
+*         dataDeIncorporacao: "2010-05-15" # MUDOU: formato da data
+*         cargo: "Delegada Titular"
+*/
 
 /**
- * @swagger
- * /agentes:
- *   get:
- *     summary: Retorna a lista de todos os agentes
- *     tags: [Agentes]
- *     parameters:
- *       - in: query
- *         name: sortBy
- *         schema:
- *           type: string
- *         description: "Campo para ordenação (ex: dataDeIncorporacao)."
- *     responses:
- *       200:
- *         description: "A lista de agentes."
- *         content:
- *           application/json:
- *             schema:
- *               type: array
- *               items:
- *                 $ref: '#/components/schemas/Agente'
- */
+* @swagger
+* /agentes:
+*   get:
+*     summary: Retorna a lista de todos os agentes
+*     tags: [Agentes]
+*     parameters:
+*       - in: query
+*         name: sortBy
+*         schema:
+*           type: string
+*         description: "Campo para ordenação (ex: dataDeIncorporacao)."
+*       - in: query
+*         name: order
+*         schema:
+*           type: string
+*           enum: [asc, desc]
+*         description: "Direção da ordenação (asc para crescente, desc para decrescente)."
+*     responses:
+*       200:
+*         description: "A lista de agentes."
+*         content:
+*           application/json:
+*             schema:
+*               type: array
+*               items:
+*                 $ref: '#/components/schemas/Agente'
+*/
 router.get('', agentesController.getAllController);
 
 /**

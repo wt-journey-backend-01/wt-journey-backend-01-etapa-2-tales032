@@ -21,28 +21,54 @@ function validateNewCase(data, res) {
     return true;
 }
 
-function validateUpdateCase(data, res) {
-    if (data.id) {
-        res.status(400).json({ message: "Não é permitido alterar o ID de um caso." });
-        return false;
-    }
-    if (data.titulo && (typeof data.titulo !== 'string' || data.titulo.trim() === '')) {
-        res.status(400).json({ message: "O campo 'titulo' deve ser uma string não vazia." });
-        return false;
-    }
-    if (data.descricao && (typeof data.descricao !== 'string' || data.descricao.trim() === '')) {
-        res.status(400).json({ message: "O campo 'descricao' deve ser uma string não vazia." });
-        return false;
-    }
-    if (data.status && !['aberto', 'solucionado'].includes(data.status)) {
-        res.status(400).json({ message: "Status inválido. Deve ser 'aberto' ou 'solucionado'." });
-        return false;
-    }
-    if (data.agente_id && !agentesRepository.getAgentByID(data.agente_id)) {
-        res.status(404).json({ message: "Novo agente responsável não encontrado." });
-        return false;
-    }
-    return true;
+function validatePutCase(data, res) {
+  if (data.id) {
+      res.status(400).json({ message: "Não é permitido alterar o ID de um caso." });
+      return false;
+  }
+  
+
+  if (!data.titulo || typeof data.titulo !== 'string' || data.titulo.trim() === '') {
+      res.status(400).json({ message: "O campo 'titulo' é obrigatório." });
+      return false;
+  }
+  if (!data.descricao || typeof data.descricao !== 'string' || data.descricao.trim() === '') {
+      res.status(400).json({ message: "O campo 'descricao' é obrigatório." });
+      return false;
+  }
+  if (!data.status || !['aberto', 'solucionado'].includes(data.status)) {
+      res.status(400).json({ message: "Status inválido. Deve ser 'aberto' ou 'solucionado'." });
+      return false;
+  }
+  if (!data.agente_id || !agentesRepository.getAgentByID(data.agente_id)) {
+      res.status(404).json({ message: "Agente responsável não encontrado." });
+      return false;
+  }
+  return true;
+}
+
+function validatePatchCase(data, res) {
+  if (data.id) {
+      res.status(400).json({ message: "Não é permitido alterar o ID de um caso." });
+      return false;
+  }
+  if (data.titulo !== undefined && (typeof data.titulo !== 'string' || data.titulo.trim() === '')) {
+      res.status(400).json({ message: "O campo 'titulo' deve ser uma string não vazia." });
+      return false;
+  }
+  if (data.descricao !== undefined && (typeof data.descricao !== 'string' || data.descricao.trim() === '')) {
+      res.status(400).json({ message: "O campo 'descricao' deve ser uma string não vazia." });
+      return false;
+  }
+  if (data.status !== undefined && !['aberto', 'solucionado'].includes(data.status)) {
+      res.status(400).json({ message: "Status inválido. Deve ser 'aberto' ou 'solucionado'." });
+      return false;
+  }
+  if (data.agente_id !== undefined && !agentesRepository.getAgentByID(data.agente_id)) {
+      res.status(404).json({ message: "Novo agente responsável não encontrado." });
+      return false;
+  }
+  return true;
 }
 
 function checkExist(id, res) {
@@ -97,7 +123,7 @@ function updateCaseController(req,res){
         const { id } = req.params;
         const data = req.body;
          if (!checkExist(id, res)) return;
-        if (!validateUpdateCase(data, res)) return;
+        if (!validatePutCase(data, res)) return;
         const updatedCase = casosRepository.updateCase(id, data);
         res.status(200).json(updatedCase);
 }
@@ -106,7 +132,7 @@ function patchCaseController(req,res){
         const { id } = req.params;
          const data = req.body;
          if (!checkExist(id, res)) return;
-        if (!validateUpdateCase(data, res)) return;
+        if (!validatePatchCase(data, res)) return;
         const patchedCase = casosRepository.patchCase(id, data);
          res.status(200).json(patchedCase);
 }
